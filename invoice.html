@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الفاتورة</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      margin: 0;
+      padding: 20px;
+      direction: rtl;
+    }
+
+    .title {
+      text-align: center;
+      padding: 20px;
+      background-color: #4CAF50;
+      color: white;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      font-size: 24px;
+    }
+
+    .invoice-box {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .invoice-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      background-color: #e8f5e9;
+      font-weight: bold;
+      text-align: center;
+      padding: 15px 0;
+      border-bottom: 2px solid #4CAF50;
+    }
+
+    .invoice-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      padding: 12px 0;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .total-section {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: #FF5722;
+      padding: 20px;
+      background-color: #fff3e0;
+      border-top: 2px solid #FF5722;
+    }
+
+    /* زر العودة */
+    .home-button {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 50px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin: 30px auto 40px;
+      display: block;
+    }
+
+    .home-button:hover {
+      background-color: #1976D2;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title">الفاتورة</div>
+
+  <div class="invoice-box">
+    <div class="invoice-header">
+      <div>الوجبة</div>
+      <div>العدد</div>
+      <div>السعر</div>
+    </div>
+    <div id="invoiceRows"></div>
+    <div class="total-section" id="totalPrice">الإجمالي: 0 ريال</div>
+  </div>
+
+  <!-- زر العودة -->
+  <button class="home-button" onclick="goHome()">الصفحة الرئيسية</button>
+
+  <script>
+    const items = JSON.parse(localStorage.getItem('selectedItems')) || [];
+    const invoiceRows = document.getElementById('invoiceRows');
+    let total = 0;
+
+    items.forEach(item => {
+      const quantity = item.quantity || 1;
+      const itemTotal = item.price * quantity;
+      total += itemTotal;
+
+      const row = document.createElement('div');
+      row.className = 'invoice-row';
+
+      row.innerHTML = `
+        <div>${item.name}</div>
+        <div>${quantity}</div>
+        <div>${itemTotal} ريال</div>
+      `;
+
+      invoiceRows.appendChild(row);
+    });
+
+    document.getElementById('totalPrice').textContent = 'الإجمالي: ' + total + ' ريال';
+
+    function goHome() {
+      window.location.href = 'index.html'; // غير هذا إذا كانت صفحتك الرئيسية باسم مختلف
+    }
+  </script>
+</body>
+</html>
