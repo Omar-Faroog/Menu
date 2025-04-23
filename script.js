@@ -1,6 +1,5 @@
 // روابط التحميل من GitHub (استبدل بالرابط الحقيقي الخاص بك)
-const githubBaseURL = 'https://raw.githubusercontent.com/USERNAME/REPO/main/';
-
+const githubBaseURL = 'https://raw.githubusercontent.com/omar-faroog/Menu/main/';
 // الملفات التي سيتم حفظها
 const filesToCache = [
   'index.html',
