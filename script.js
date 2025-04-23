@@ -1,4 +1,3 @@
-<script>
 // روابط التحميل من GitHub (استبدل بالرابط الحقيقي الخاص بك)
 const githubBaseURL = 'https://raw.githubusercontent.com/USERNAME/REPO/main/';
 
@@ -130,4 +129,3 @@ document.addEventListener("DOMContentLoaded", () => {
 function closeModal() {
   document.getElementById('quantityModal').style.display = 'none';
 }
-</script>
