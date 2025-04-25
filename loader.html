@@ -2,86 +2,74 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Offline App</title>
-  <script>
-    const githubBaseURL = 'https://raw.githubusercontent.com/omar-faroog/Menu/main/';
-    const filesToCache = [
-      'index.html',
-      'invoice.html',
-      'style.css',
-      'script.js',
-      'logo.png'
-    ];
-
-    function isOnline() {
-      return navigator.onLine;
-    }
-
-    async function cacheFiles() {
-      for (let file of filesToCache) {
-        try {
-          const response = await fetch(githubBaseURL + file);
-          if (file.endsWith('.png')) {
-            const blob = await response.blob();
-            const reader = new FileReader();
-            reader.onloadend = function () {
-              localStorage.setItem('cached_' + file, reader.result);
-            };
-            reader.readAsDataURL(blob);
-          } else {
-            const content = await response.text();
-            localStorage.setItem('cached_' + file, content);
-          }
-        } catch (e) {
-          console.log('فشل تحميل الملف:', file, e);
-        }
-      }
-    }
-
-    function loadCachedApp() {
-      const cachedHTML = localStorage.getItem('cached_index.html');
-      const cachedCSS = localStorage.getItem('cached_style.css');
-      const cachedJS = localStorage.getItem('cached_script.js');
-
-      if (cachedHTML) {
-        document.documentElement.innerHTML = cachedHTML;
-
-        // أضف CSS من localStorage
-        if (cachedCSS) {
-          const style = document.createElement('style');
-          style.textContent = cachedCSS;
-          document.head.appendChild(style);
-        }
-
-        // أضف JS من localStorage
-        if (cachedJS) {
-          const script = document.createElement('script');
-          script.textContent = cachedJS;
-          document.body.appendChild(script);
-        }
-
-        // استبدل صورة logo.png إن كانت موجودة في localStorage
-        const logoBase64 = localStorage.getItem('cached_logo.png');
-        if (logoBase64) {
-          const img = document.querySelector('img[src="logo.png"]');
-          if (img) img.src = logoBase64;
-        }
-
-      } else {
-        document.body.innerHTML = '<h2>يجب الاتصال بالإنترنت أول مرة لتحميل التطبيق</h2>';
-      }
-    }
-
-    window.addEventListener('load', () => {
-      if (isOnline()) {
-        cacheFiles();
-      } else {
-        loadCachedApp();
-      }
-    });
-  </script>
+  <title>جارٍ التحميل...</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+  </style>
 </head>
 <body>
-  <h2>جارٍ التحميل...</h2>
+  <h2>جاري تحميل التطبيق...</h2>
+
+  <script>
+    const baseURL = 'https://raw.githubusercontent.com/omar-faroog/Menu/main/';
+    const files = {
+      'index.html': 'text',
+      'invoice.html': 'text',
+      'style.css': 'text',
+      'script.js': 'text',
+      'logo.png': 'blob'
+    };
+
+    async function downloadAndCache() {
+      for (let [file, type] of Object.entries(files)) {
+        try {
+          const response = await fetch(baseURL + file);
+          if (type === 'blob') {
+            const blob = await response.blob();
+            const reader = new FileReader();
+            reader.onloadend = () => localStorage.setItem('cached_' + file, reader.result);
+            reader.readAsDataURL(blob);
+          } else {
+            const text = await response.text();
+            localStorage.setItem('cached_' + file, text);
+          }
+        } catch (e) {
+          console.log('فشل تحميل', file, e);
+        }
+      }
+    }
+
+    function loadAppFromCache() {
+      const html = localStorage.getItem('cached_index.html');
+      const css = localStorage.getItem('cached_style.css');
+      const js = localStorage.getItem('cached_script.js');
+
+      if (!html || !css || !js) {
+        document.body.innerHTML = '<h3>لم يتم تحميل الملفات. يرجى الاتصال بالإنترنت أولاً.</h3>';
+        return;
+      }
+
+      document.head.innerHTML = `
+        <style>${css}</style>
+        <script>${js}<\/script>
+      `;
+
+      document.body.innerHTML = html;
+
+      // تشغيل السكربت يدويًا لأن innerHTML لا ينفذ <script>
+      const script = document.createElement('script');
+      script.textContent = js;
+      document.body.appendChild(script);
+    }
+
+    async function init() {
+      if (navigator.onLine) {
+        await downloadAndCache();
+      }
+      loadAppFromCache();
+    }
+
+    init();
+  </script>
 </body>
 </html>
