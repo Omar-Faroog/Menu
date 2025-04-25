@@ -3,18 +3,18 @@ let currentBox = null;
 let currentName = "";
 let currentPrice = 0;
 
-const githubBaseURL = 'https://raw.githubusercontent.com/omar-faroog/Menu/main/';
-const filesToCache = ['index.html', 'invoice.html', 'style.css', 'script.js', 'logo.png'];
+const githubBaseURL = "https://raw.githubusercontent.com/omar-faroog/Menu/main/";
+const filesToCache = ["index.html", "invoice.html", "style.css", "script.js", "logo.png"];
 
 // تحميل الملفات وتخزينها في localStorage
 async function cacheFiles() {
   for (const file of filesToCache) {
     try {
       const response = await fetch(githubBaseURL + file);
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
         localStorage.setItem(file, await response.json());
-      } else if (contentType && contentType.includes('image')) {
+      } else if (contentType && contentType.includes("image")) {
         const blob = await response.blob();
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -39,46 +39,55 @@ function isOnline() {
   return navigator.onLine;
 }
 
-// تحميل الملفات عند فتح التطبيق لأول مرة أو عند الاتصال بالإنترنت
+// تحميل ملف index.html فقط إذا كان المستخدم متصلاً بالإنترنت
 if (isOnline()) {
-  cacheFiles();
+  // إعادة تحميل index.html فقط
+  try {
+    const response = await fetch(githubBaseURL + "index.html");
+    const content = await response.text();
+    localStorage.setItem("index.html", content); // تحديث المحتوى
+  } catch (err) {
+    console.error("فشل تحميل index.html:", err);
+  }
+} else {
+  console.log("المستخدم غير متصل بالإنترنت، سيتم تحميل الملفات من الذاكرة المحلية.");
 }
 
 // ================= كودك الأساسي =================
 
-document.querySelectorAll('.meal-box').forEach(box => {
+document.querySelectorAll(".meal-box").forEach(box => {
   let quantity = 0;
   const name = box.dataset.name;
   const price = parseFloat(box.dataset.price);
 
-  box.addEventListener('click', () => {
-    if (box.classList.contains('selected')) {
+  box.addEventListener("click", () => {
+    if (box.classList.contains("selected")) {
       quantity++;
     } else {
       quantity = 1;
-      box.classList.add('selected');
+      box.classList.add("selected");
     }
 
-    let closeButton = box.querySelector('.close-btn');
+    let closeButton = box.querySelector(".close-btn");
     if (!closeButton) {
-      closeButton = document.createElement('button');
-      closeButton.innerHTML = '×';
-      closeButton.classList.add('close-btn');
+      closeButton = document.createElement("button");
+      closeButton.innerHTML = "×";
+      closeButton.classList.add("close-btn");
       box.appendChild(closeButton);
 
-      closeButton.addEventListener('click', (e) => {
+      closeButton.addEventListener("click", (e) => {
         e.stopPropagation();
-        box.classList.remove('selected');
+        box.classList.remove("selected");
         selectedItems = selectedItems.filter(item => item.name !== name);
-        box.querySelector('.quantity-indicator')?.remove();
+        box.querySelector(".quantity-indicator")?.remove();
         closeButton.remove();
       });
     }
 
-    let quantityIndicator = box.querySelector('.quantity-indicator');
+    let quantityIndicator = box.querySelector(".quantity-indicator");
     if (!quantityIndicator) {
-      quantityIndicator = document.createElement('span');
-      quantityIndicator.classList.add('quantity-indicator');
+      quantityIndicator = document.createElement("span");
+      quantityIndicator.classList.add("quantity-indicator");
       box.appendChild(quantityIndicator);
     }
 
@@ -89,24 +98,24 @@ document.querySelectorAll('.meal-box').forEach(box => {
   });
 });
 
-document.getElementById('executeButton').addEventListener('click', () => {
-  localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
+document.getElementById("executeButton").addEventListener("click", () => {
+  localStorage.setItem("selectedItems", JSON.stringify(selectedItems));
   setTimeout(() => {
-    window.location.href = 'invoice.html';
+    window.location.href = "invoice.html";
   }, 100);
 });
 
-document.getElementById('confirmQuantity').addEventListener('click', () => {
-  const qty = parseInt(document.getElementById('quantityInput').value);
+document.getElementById("confirmQuantity").addEventListener("click", () => {
+  const qty = parseInt(document.getElementById("quantityInput").value);
   if (!isNaN(qty) && qty > 0) {
     const total = currentPrice * qty;
-    currentBox.classList.add('selected');
+    currentBox.classList.add("selected");
     selectedItems = selectedItems.filter(item => item.name !== currentName);
     selectedItems.push({ name: currentName, price: currentPrice, quantity: qty, total });
   }
-  document.getElementById('quantityModal').style.display = 'none';
+  document.getElementById("quantityModal").style.display = "none";
 });
 
 function closeModal() {
-  document.getElementById('quantityModal').style.display = 'none';
+  document.getElementById("quantityModal").style.display = "none";
 }
