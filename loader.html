@@ -49,15 +49,17 @@
         return;
       }
 
-      document.head.innerHTML = `
-        <style>${css}</style>
-        <script>${js}<\/script>
-      `;
-
+      // تحميل HTML
       document.body.innerHTML = html;
 
-      // تشغيل السكربت يدويًا لأن innerHTML لا ينفذ <script>
+      // تحميل CSS
+      const style = document.createElement('style');
+      style.innerHTML = css;
+      document.head.appendChild(style);
+
+      // تحميل الجافاسكربت
       const script = document.createElement('script');
+      script.type = 'text/javascript';
       script.textContent = js;
       document.body.appendChild(script);
     }
