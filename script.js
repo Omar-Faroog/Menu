@@ -40,20 +40,29 @@ function isOnline() {
   return window.navigator.onLine;
 }
 
-// تحميل ملف index.html فقط إذا كان المستخدم متصلاً بالإنترنت
-if (isOnline()) {
-  fetch(githubBaseURL + "index.html")
-    .then(response => response.text())
-    .then(content => {
-      localStorage.setItem("index.html", content);  // تحديث المحتوى
-      console.log("تم تحديث index.html بنجاح");
-    })
-    .catch(err => {
-      console.error("فشل تحميل index.html:", err);
-    });
-} else {
-  console.log("المستخدم غير متصل بالإنترنت، سيتم تحميل الملفات من الذاكرة المحلية.");
+// تحميل ملف index.html فقط إذا كان المستخدم متصلاً بالإنترنت ويحتاج لتحديث
+function updateIndex() {
+  if (isOnline()) {
+    fetch(githubBaseURL + "index.html")
+      .then(response => response.text())
+      .then(content => {
+        const cachedContent = loadFromCache("index.html");
+        if (cachedContent !== content) {
+          localStorage.setItem("index.html", content);  // تحديث المحتوى
+          console.log("تم تحديث index.html بنجاح");
+          window.location.reload(); // إعادة تحميل الصفحة بعد التحديث
+        } else {
+          console.log("المحتوى محدث بالفعل.");
+        }
+      })
+      .catch(err => {
+        console.error("فشل تحميل index.html:", err);
+      });
+  }
 }
+
+// التحقق من الاتصال بالإنترنت عند دخول الصفحة
+updateIndex();
 
 // ================= كودك الأساسي =================
 
