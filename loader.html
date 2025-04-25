@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Offline App</title>
+  <script>
+    const githubBaseURL = 'https://raw.githubusercontent.com/omar-faroog/Menu/main/';
+    const filesToCache = [
+      'index.html',
+      'invoice.html',
+      'style.css',
+      'script.js',
+      'logo.png'
+    ];
+
+    function isOnline() {
+      return navigator.onLine;
+    }
+
+    async function cacheFiles() {
+      for (let file of filesToCache) {
+        try {
+          const response = await fetch(githubBaseURL + file);
+          if (file.endsWith('.png')) {
+            const blob = await response.blob();
+            const reader = new FileReader();
+            reader.onloadend = function () {
+              localStorage.setItem('cached_' + file, reader.result);
+            };
+            reader.readAsDataURL(blob);
+          } else {
+            const content = await response.text();
+            localStorage.setItem('cached_' + file, content);
+          }
+        } catch (e) {
+          console.log('فشل تحميل الملف:', file, e);
+        }
+      }
+    }
+
+    function loadCachedApp() {
+      const cachedHTML = localStorage.getItem('cached_index.html');
+      const cachedCSS = localStorage.getItem('cached_style.css');
+      const cachedJS = localStorage.getItem('cached_script.js');
+
+      if (cachedHTML) {
+        document.documentElement.innerHTML = cachedHTML;
+
+        // أضف CSS من localStorage
+        if (cachedCSS) {
+          const style = document.createElement('style');
+          style.textContent = cachedCSS;
+          document.head.appendChild(style);
+        }
+
+        // أضف JS من localStorage
+        if (cachedJS) {
+          const script = document.createElement('script');
+          script.textContent = cachedJS;
+          document.body.appendChild(script);
+        }
+
+        // استبدل صورة logo.png إن كانت موجودة في localStorage
+        const logoBase64 = localStorage.getItem('cached_logo.png');
+        if (logoBase64) {
+          const img = document.querySelector('img[src="logo.png"]');
+          if (img) img.src = logoBase64;
+        }
+
+      } else {
+        document.body.innerHTML = '<h2>يجب الاتصال بالإنترنت أول مرة لتحميل التطبيق</h2>';
+      }
+    }
+
+    window.addEventListener('load', () => {
+      if (isOnline()) {
+        cacheFiles();
+      } else {
+        loadCachedApp();
+      }
+    });
+  </script>
+</head>
+<body>
+  <h2>جارٍ التحميل...</h2>
+</body>
+</html>
