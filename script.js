@@ -1,6 +1,4 @@
-// روابط التحميل من GitHub (استبدل بالرابط الحقيقي الخاص بك)
 const githubBaseURL = 'https://raw.githubusercontent.com/omar-faroog/Menu/main/';
-// الملفات التي سيتم حفظها
 const filesToCache = [
   'index.html',
   'invoice.html',
@@ -9,12 +7,10 @@ const filesToCache = [
   'logo.png'
 ];
 
-// التحقق من الاتصال بالإنترنت
 function isOnline() {
   return navigator.onLine;
 }
 
-// تحميل الملفات وتخزينها
 async function cacheFiles() {
   for (let file of filesToCache) {
     try {
@@ -36,7 +32,23 @@ async function cacheFiles() {
   }
 }
 
-// عند تحميل الصفحة
+function injectCachedAssets() {
+  const cachedCSS = localStorage.getItem('cached_style.css');
+  const cachedJS = localStorage.getItem('cached_script.js');
+
+  if (cachedCSS) {
+    const style = document.createElement('style');
+    style.textContent = cachedCSS;
+    document.head.appendChild(style);
+  }
+
+  if (cachedJS) {
+    const script = document.createElement('script');
+    script.textContent = cachedJS;
+    document.body.appendChild(script);
+  }
+}
+
 window.addEventListener('load', () => {
   if (!isOnline()) {
     const cachedHTML = localStorage.getItem('cached_index.html');
@@ -44,6 +56,7 @@ window.addEventListener('load', () => {
       document.open();
       document.write(cachedHTML);
       document.close();
+      window.addEventListener('DOMContentLoaded', injectCachedAssets);
     } else {
       document.body.innerHTML = '<h2>يجب الاتصال بالإنترنت أول مرة لتحميل التطبيق</h2>';
     }
