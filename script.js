@@ -44,18 +44,19 @@ function isOnline() {
 async function updateIndex() {
   if (isOnline()) {
     try {
+      // حذف النسخة المخزنة في localStorage
+      localStorage.removeItem("index.html");
+      
+      // تحميل index.html من الإنترنت
       const response = await fetch(githubBaseURL + "index.html");
       const onlineContent = await response.text();
-      const cachedContent = loadFromCache("index.html");
-
-      // إذا كان المحتوى من الإنترنت مختلفًا عن المحتوى المخزن، نقوم بتحديثه
-      if (onlineContent !== cachedContent) {
-        console.log("تم تحديث index.html من الإنترنت");
-        localStorage.setItem("index.html", onlineContent);  // تحديث النسخة المخزنة
-        window.location.reload();  // إعادة تحميل الصفحة
-      } else {
-        console.log("المحتوى محدث بالفعل.");
-      }
+      
+      // تخزين النسخة الجديدة في localStorage
+      localStorage.setItem("index.html", onlineContent);
+      
+      // إعادة تحميل الصفحة لعرض النسخة الجديدة
+      console.log("تم تحديث index.html من الإنترنت");
+      window.location.reload();  // إعادة تحميل الصفحة
     } catch (err) {
       console.error("فشل تحميل index.html:", err);
     }
