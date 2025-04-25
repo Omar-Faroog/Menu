@@ -31,6 +31,35 @@ async function cacheFiles() {
   }
 }
 
+// تحميل المحتوى من localStorage أو من الإنترنت
+async function loadFile(file) {
+  if (isOnline()) {
+    // إذا كان متصلاً بالإنترنت، قم بتحميل الملفات من الإنترنت وتخزينها
+    try {
+      const response = await fetch(githubBaseURL + file);
+      const contentType = response.headers.get("content-type");
+      let content;
+      if (contentType && contentType.includes("application/json")) {
+        content = await response.json();
+      } else if (contentType && contentType.includes("image")) {
+        content = await response.blob();
+      } else {
+        content = await response.text();
+      }
+      // تخزين المحتوى في localStorage
+      localStorage.setItem(file, content);
+      return content;
+    } catch (err) {
+      console.error(`فشل تحميل ${file}:`, err);
+      return loadFromCache(file); // في حال فشل تحميل الملف من الإنترنت، نعرض النسخة المخزنة
+    }
+  } else {
+    // إذا لم يكن متصلاً بالإنترنت، اعرض النسخة المخزنة من localStorage
+    return loadFromCache(file);
+  }
+}
+
+// تحميل المحتوى المخزن في localStorage
 function loadFromCache(filename) {
   return localStorage.getItem(filename);
 }
@@ -42,24 +71,11 @@ function isOnline() {
 
 // تحميل وتحديث index.html فقط إذا كان هناك اتصال بالإنترنت
 async function updateIndex() {
-  if (isOnline()) {
-    try {
-      // حذف النسخة المخزنة في localStorage
-      localStorage.removeItem("index.html");
-      
-      // تحميل index.html من الإنترنت
-      const response = await fetch(githubBaseURL + "index.html");
-      const onlineContent = await response.text();
-      
-      // تخزين النسخة الجديدة في localStorage
-      localStorage.setItem("index.html", onlineContent);
-      
-      // إعادة تحميل الصفحة لعرض النسخة الجديدة
-      console.log("تم تحديث index.html من الإنترنت");
-      window.location.reload();  // إعادة تحميل الصفحة
-    } catch (err) {
-      console.error("فشل تحميل index.html:", err);
-    }
+  const indexContent = await loadFile("index.html");
+  if (indexContent) {
+    document.getElementById("root").innerHTML = indexContent; // وضع المحتوى في عنصر الـ root
+  } else {
+    console.log("لم يتم العثور على المحتوى المخزن أو تحميله.");
   }
 }
 
@@ -67,7 +83,13 @@ async function updateIndex() {
 if (isOnline()) {
   updateIndex();  // تحقق من التحديث
 } else {
-  console.log("لا يوجد اتصال بالإنترنت.");
+  // إذا لم يكن هناك اتصال بالإنترنت، نعرض المحتوى المخزن
+  const indexContent = loadFromCache("index.html");
+  if (indexContent) {
+    document.getElementById("root").innerHTML = indexContent; // وضع المحتوى في عنصر الـ root
+  } else {
+    console.log("لا يوجد محتوى مخزن.");
+  }
 }
 
 // ================= كودك الأساسي =================
