@@ -40,29 +40,34 @@ function isOnline() {
   return window.navigator.onLine;
 }
 
-// تحميل ملف index.html فقط إذا كان المستخدم متصلاً بالإنترنت ويحتاج لتحديث
-function updateIndex() {
+// تحميل وتحديث index.html فقط إذا كان هناك اتصال بالإنترنت
+async function updateIndex() {
   if (isOnline()) {
-    fetch(githubBaseURL + "index.html")
-      .then(response => response.text())
-      .then(content => {
-        const cachedContent = loadFromCache("index.html");
-        if (cachedContent !== content) {
-          localStorage.setItem("index.html", content);  // تحديث المحتوى
-          console.log("تم تحديث index.html بنجاح");
-          window.location.reload(); // إعادة تحميل الصفحة بعد التحديث
-        } else {
-          console.log("المحتوى محدث بالفعل.");
-        }
-      })
-      .catch(err => {
-        console.error("فشل تحميل index.html:", err);
-      });
+    try {
+      const response = await fetch(githubBaseURL + "index.html");
+      const onlineContent = await response.text();
+      const cachedContent = loadFromCache("index.html");
+
+      // إذا كان المحتوى من الإنترنت مختلفًا عن المحتوى المخزن، نقوم بتحديثه
+      if (onlineContent !== cachedContent) {
+        console.log("تم تحديث index.html من الإنترنت");
+        localStorage.setItem("index.html", onlineContent);  // تحديث النسخة المخزنة
+        window.location.reload();  // إعادة تحميل الصفحة
+      } else {
+        console.log("المحتوى محدث بالفعل.");
+      }
+    } catch (err) {
+      console.error("فشل تحميل index.html:", err);
+    }
   }
 }
 
-// التحقق من الاتصال بالإنترنت عند دخول الصفحة
-updateIndex();
+// التحقق من الاتصال بالإنترنت عند دخول الصفحة وتحديث index.html إذا لزم الأمر
+if (isOnline()) {
+  updateIndex();  // تحقق من التحديث
+} else {
+  console.log("لا يوجد اتصال بالإنترنت.");
+}
 
 // ================= كودك الأساسي =================
 
