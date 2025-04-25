@@ -35,20 +35,22 @@ function loadFromCache(filename) {
   return localStorage.getItem(filename);
 }
 
+// فحص حالة الاتصال بالإنترنت
 function isOnline() {
-  return navigator.onLine;
+  return window.navigator.onLine;
 }
 
 // تحميل ملف index.html فقط إذا كان المستخدم متصلاً بالإنترنت
 if (isOnline()) {
-  // إعادة تحميل index.html فقط
-  try {
-    const response = await fetch(githubBaseURL + "index.html");
-    const content = await response.text();
-    localStorage.setItem("index.html", content); // تحديث المحتوى
-  } catch (err) {
-    console.error("فشل تحميل index.html:", err);
-  }
+  fetch(githubBaseURL + "index.html")
+    .then(response => response.text())
+    .then(content => {
+      localStorage.setItem("index.html", content);  // تحديث المحتوى
+      console.log("تم تحديث index.html بنجاح");
+    })
+    .catch(err => {
+      console.error("فشل تحميل index.html:", err);
+    });
 } else {
   console.log("المستخدم غير متصل بالإنترنت، سيتم تحميل الملفات من الذاكرة المحلية.");
 }
