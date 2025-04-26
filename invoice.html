@@ -60,22 +60,90 @@
       border-top: 2px solid #FF5722;
     }
 
-    /* زر العودة */
     .home-button {
       background-color: #2196F3;
       color: white;
       border: none;
-      padding: 15px 25px;
-      border-radius: 50px;
+      padding: 11px 30px;
+      border-radius: 15px;
       font-size: 16px;
       cursor: pointer;
-      transition: background-color 0.3s;
-      margin: 30px auto 40px;
+      box-shadow: 0 4px 0 #1976D2;
+      text-decoration: none;
       display: block;
+      transform: translateX(-0%);
+      -webkit-tap-highlight-color: transparent;
+      text-align: center;
     }
 
-    .home-button:hover {
-      background-color: #1976D2;
+    .home-button:active {
+      box-shadow: 0 0px 0 #1976D2;
+      transform: translateY(4px);
+    }
+
+    .edit-button {
+      background-color: #54C202;
+      color: white;
+      border: none;
+      padding: 11px 30px;
+      border-radius: 15px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #58A700;
+      display: block;
+      transform: translateX(-0%);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .edit-button:active {
+      box-shadow: 0 0px 0 #79B933;
+      transform: translateY(4px);
+    }
+
+    .print-button {
+      background-color: #FF9800;
+      color: white;
+      border: none;
+      padding: 11px 30px;
+      border-radius: 15px;
+      font-size: 16px;
+      box-shadow: 0 4px 0 #EF6C00;
+      display: block;
+      transform: translateX(-0%);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .print-button:active {
+      box-shadow: 0 0px 0 #EF6C00;
+      transform: translateY(4px);
+    }
+
+    .buttons-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 30px auto 40px;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+      }
+
+      .invoice-box {
+        box-shadow: none;
+        border-radius: 0;
+        width: 100%;
+        max-width: 100%;
+      }
     }
   </style>
 </head>
@@ -93,8 +161,12 @@
     <div class="total-section" id="totalPrice">الإجمالي: 0 ريال</div>
   </div>
 
-  <!-- زر العودة -->
-  <button class="home-button" onclick="goHome()">الصفحة الرئيسية</button>
+  <!-- أزرار التعديل والطباعة والعودة -->
+  <div class="buttons-container no-print">
+    <button class="edit-button" onclick="editOrder()">تعديل</button>
+    <a href="index.html" id="homeBtn" class="home-button">الصفحة الرئيسية</a>
+    <button class="print-button" onclick="delayedPrint()">طباعة</button>
+  </div>
 
   <script>
     const items = JSON.parse(localStorage.getItem('selectedItems')) || [];
@@ -120,9 +192,24 @@
 
     document.getElementById('totalPrice').textContent = 'الإجمالي: ' + total + ' ريال';
 
-    function goHome() {
-      window.location.href = 'index.html'; // غير هذا إذا كانت صفحتك الرئيسية باسم مختلف
+    function editOrder() {
+      localStorage.setItem('editMode', 'true');
+      setTimeout(function() {
+      window.location.href = 'index.html';
+      }, 130);
     }
+document.getElementById("homeBtn").addEventListener("click", function(e) {
+  e.preventDefault(); // منع الانتقال الفوري
+  setTimeout(function() {
+    window.location.href = 'index.html';
+  }, 130);
+});
+function delayedPrint() {
+  setTimeout(function() {
+    window.print();
+  }, 130);
+}
   </script>
+
 </body>
 </html>
