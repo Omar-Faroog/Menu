@@ -44,6 +44,20 @@ if (isOnline()) {
   cacheFiles();
 }
 
+// تحديث index.html عند عودة الاتصال بالإنترنت
+window.addEventListener('online', () => {
+  console.log('تم الاتصال بالإنترنت، يتم تحديث index.html...');
+  fetch(githubBaseURL + 'index.html')
+    .then(response => response.text())
+    .then(text => {
+      localStorage.setItem('index.html', text);
+      console.log('تم تحديث index.html بنجاح');
+    })
+    .catch(err => {
+      console.error('فشل في تحديث index.html:', err);
+    });
+});
+
 // ================= كودك الأساسي =================
 
 document.querySelectorAll('.meal-box').forEach(box => {
