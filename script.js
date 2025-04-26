@@ -46,17 +46,18 @@ if (isOnline()) {
 
 // تحديث index.html عند عودة الاتصال بالإنترنت
 window.addEventListener('online', () => {
-  console.log('تم الاتصال بالإنترنت، يتم تحديث index.html...');
+
+  // تحديث index.html أيضا
   fetch(githubBaseURL + 'index.html')
     .then(response => response.text())
     .then(text => {
       localStorage.setItem('index.html', text);
-      console.log('تم تحديث index.html بنجاح');
+      console.log('تم تحديث index.html بنجاح عند فتح التطبيق.');
     })
     .catch(err => {
-      console.error('فشل في تحديث index.html:', err);
+      console.error('فشل في تحديث index.html عند فتح التطبيق:', err);
     });
-});
+}
 
 // ================= كودك الأساسي =================
 
