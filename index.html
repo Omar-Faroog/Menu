@@ -60,7 +60,7 @@
 
   <div class="menu-grid">
     <div class="meal-row" data-single-select="false">
-      <div class="meal-box" data-name="ربع شواية" data-price="20000">ربع شواية</div>
+      <div class="meal-box" data-name="ربع شواية" data-price="2000">ربع شواية</div>
       <div class="meal-box" data-name="نص شواية" data-price="4000">نص شواية</div>
       <div class="meal-box" data-name="إلا ربع شواية" data-price="6000">إلا ربع شواية</div>
       <div class="meal-box" data-name="حبة شواية" data-price="8000">حبة شواية</div>
@@ -81,7 +81,7 @@
       <div class="meal-box" data-name="نص صحن ثوم" data-price="700">نص صحن ثوم</div>
       <div class="meal-box" data-name="نص سحاوق عادي" data-price="400">نص سحاوق عادي</div>
       <div class="meal-box" data-name="نص سحاوق قرعة" data-price="500">نص سحاوق قرعة</div>
-      <div class="meal-box" data-name="نص سحاوق هرش" data-price="1800">نص سحاوق هرش</div>
+      <div class="meal-box" data-name="واحد سحاوق هرش" data-price="2000">واحد سحاوق هرش</div>
     </div>
     <div class="meal-row" data-single-select="false">
       <div class="meal-box" data-name="واحد زبادي" data-price="700">واحد زبادي</div>
@@ -99,44 +99,82 @@
 
 
 <script>
-const logo = document.querySelector('.title-image');
-const popup = document.getElementById('popup');
-const closePopup = document.getElementById('closePopup');
+  const logo = document.querySelector('.title-image');
+  const popup = document.getElementById('popup');
+  const closePopup = document.getElementById('closePopup');
 
-let pressTimer;
-let isPressing = false;
+  let pressTimer;
+  let isPressing = false;
 
-// للهواتف: اللمس يبدأ
-logo.addEventListener('touchstart', (e) => {
-  isPressing = true;
-  pressTimer = setTimeout(() => {
-    if (isPressing) {
-      popup.style.display = 'flex';
+  logo.addEventListener('touchstart', () => {
+    isPressing = true;
+    pressTimer = setTimeout(() => {
+      if (isPressing) {
+        popup.style.display = 'flex';
+      }
+    }, 5000);
+  });
+
+  logo.addEventListener('touchend', () => {
+    isPressing = false;
+    clearTimeout(pressTimer);
+  });
+
+  logo.addEventListener('touchcancel', () => {
+    isPressing = false;
+    clearTimeout(pressTimer);
+  });
+
+  logo.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+  });
+
+  closePopup.addEventListener('click', () => {
+    popup.style.display = 'none';
+  });
+  // ========== إدارة الوجبات ==========
+
+  const mealBoxes = document.querySelectorAll('.meal-box');
+  let selectedMeal = null;
+
+  // استرجاع البيانات عند تحميل الصفحة
+  window.addEventListener('DOMContentLoaded', () => {
+    const storedItems = JSON.parse(localStorage.getItem('selectedItems'));
+    const confirmed = localStorage.getItem('confirmedEdit');
+
+    if (confirmed === 'true' && storedItems && storedItems.length > 0) {
+      const meal = storedItems[0];
+      mealBoxes.forEach(box => {
+        if (box.dataset.name === meal.name) {
+          box.classList.add('selected');
+          selectedMeal = meal;
+        }
+      });
+      // إعادة تعيين العلامة حتى لا تظهر الوجبات بعد إعادة الدخول
+      localStorage.removeItem('confirmedEdit');
     }
-  }, 5000);
-});
+  });
 
-// للهواتف: اللمس ينتهي
-logo.addEventListener('touchend', () => {
-  isPressing = false;
-  clearTimeout(pressTimer);
-});
+  mealBoxes.forEach(box => {
+    box.addEventListener('click', () => {
+      mealBoxes.forEach(b => b.classList.remove('selected'));
+      box.classList.add('selected');
+      selectedMeal = {
+        name: box.dataset.name,
+        price: parseInt(box.dataset.price),
+        quantity: 1
+      };
+      localStorage.setItem('selectedItems', JSON.stringify([selectedMeal]));
+    });
+  });
 
-// في حال خرج الإصبع من الصورة
-logo.addEventListener('touchcancel', () => {
-  isPressing = false;
-  clearTimeout(pressTimer);
-});
-
-// منع قائمة الخيارات التي تظهر عند الضغط المطوّل
-logo.addEventListener('contextmenu', (e) => {
-  e.preventDefault();
-});
-
-closePopup.addEventListener('click', () => {
-  popup.style.display = 'none'; // غلق النافذة المنبثقة
-});
+  document.getElementById('executeButton').addEventListener('click', () => {
+    if (selectedMeal) {
+      localStorage.setItem('confirmedEdit', 'true');
+      window.location.href = 'invoice.html';
+  });
 </script>
+
 
 </body>
 <script src="script.js"></script>
