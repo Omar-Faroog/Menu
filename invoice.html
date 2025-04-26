@@ -1,215 +1,326 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>الفاتورة</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f7f7f7;
-      margin: 0;
-      padding: 20px;
-      direction: rtl;
+<!DOCTYPE html>  
+<html lang="ar" dir="rtl">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
+  <title>قائمة الطعام</title>  
+  <link rel="stylesheet" href="style.css" />  
+  <style>  
+    .popup {  
+      display: none;  
+      position: fixed;  
+      top: 0; left: 0;  
+      width: 100%; height: 100%;  
+      background: rgba(0, 0, 0, 0.5);  
+      justify-content: center;  
+      align-items: center;  
+      z-index: 9999;  
+    }  
+    .popup-content {  
+      background-color: white;  
+      padding: 20px;  
+      border-radius: 10px;  
+      text-align: center;  
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  
+    }  
+    #closePopup {  
+      margin-top: 20px;  
+      padding: 10px;  
+      background-color: #333;  
+      color: white;  
+      border: none;  
+      border-radius: 5px;  
+      cursor: pointer;  
+    }  
+    #closePopup:hover {  
+      background-color: #555;  
+    }  
+    /* نبض مع ضوء منبعث */  
+    /* التوهج */
+    .pulse {
+      position: relative;
+      animation: pulse-glow 2s infinite;
+    }
+    .pulse::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(255, 223, 0, 0.4);
+      box-shadow: 0 0 20px 10px rgba(255, 223, 0, 0.5);
+      animation: glow 2s infinite;
+      z-index: -1;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.7; }
+    }
+    @keyframes glow {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.5); opacity: 0.2; }
     }
 
-    .title {
-      text-align: center;
-      padding: 20px;
-      background-color: #4CAF50;
+    /* تعطيل التوهج */
+    .no-glow::after {
+      animation: none;
+      background: none;
+      box-shadow: none;
+      display: none;
+    }
+    .no-glow {
+      animation: none;
+    }
+
+    /* شكل الفقاعة */
+    .bubble {
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      background-color: red;
       color: white;
-      margin-bottom: 20px;
+      font-size: 10px;
+      padding: 2px 5px;
       border-radius: 10px;
-      font-size: 24px;
-    }
-
-    .invoice-box {
-      max-width: 900px;
-      margin: 0 auto;
-      background-color: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-
-    .invoice-header {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      background-color: #e8f5e9;
       font-weight: bold;
-      text-align: center;
-      padding: 15px 0;
-      border-bottom: 2px solid #4CAF50;
+      display: inline-block;
     }
 
-    .invoice-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      padding: 12px 0;
-      text-align: center;
-      border-bottom: 1px solid #ddd;
+    .hidden {
+      display: none;
     }
 
-    .total-section {
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-      color: #FF5722;
-      padding: 20px;
-      background-color: #fff3e0;
-      border-top: 2px solid #FF5722;
-    }
-
-    .home-button {
-      background-color: #2196F3;
-      color: white;
-      border: none;
-      padding: 11px 30px;
-      border-radius: 15px;
-      font-size: 16px;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #1976D2;
-      text-decoration: none;
-      display: block;
-      transform: translateX(-0%);
-      -webkit-tap-highlight-color: transparent;
-      text-align: center;
-    }
-
-    .home-button:active {
-      box-shadow: 0 0px 0 #1976D2;
-      transform: translateY(4px);
-    }
-
-    .edit-button {
-      background-color: #54C202;
-      color: white;
-      border: none;
-      padding: 11px 30px;
-      border-radius: 15px;
-      font-size: 16px;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #58A700;
-      display: block;
-      transform: translateX(-0%);
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .edit-button:active {
-      box-shadow: 0 0px 0 #79B933;
-      transform: translateY(4px);
-    }
-
-    .print-button {
-      background-color: #FF9800;
-      color: white;
-      border: none;
-      padding: 11px 30px;
-      border-radius: 15px;
-      font-size: 16px;
-      box-shadow: 0 4px 0 #EF6C00;
-      display: block;
-      transform: translateX(-0%);
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .print-button:active {
-      box-shadow: 0 0px 0 #EF6C00;
-      transform: translateY(4px);
-    }
-
-    .buttons-container {
+    /* تنسيق الهيدر */
+    .title-container {
+      position: relative;
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 30px auto 40px;
+      align-items: center;
+      padding: 10px;
     }
-
-    @media print {
-      .no-print {
-        display: none !important;
-      }
-
-      body {
-        background: white;
-        margin: 0;
-        padding: 0;
-        font-size: 14px;
-      }
-
-      .invoice-box {
-        box-shadow: none;
-        border-radius: 0;
-        width: 100%;
-        max-width: 100%;
-      }
+    #alert-icon {
+      margin-right: auto;
+      margin-left: 10px;
+      cursor: pointer;
+      position: relative;
     }
-  </style>
-</head>
-<body>
-
-  <div class="title">الفاتورة</div>
-
-  <div class="invoice-box">
-    <div class="invoice-header">
-      <div>الوجبة</div>
-      <div>العدد</div>
-      <div>السعر</div>
-    </div>
-    <div id="invoiceRows"></div>
-    <div class="total-section" id="totalPrice">الإجمالي: 0 ريال</div>
-  </div>
-
-  <!-- أزرار التعديل والطباعة والعودة -->
-  <div class="buttons-container no-print">
-    <button class="edit-button" onclick="editOrder()">تعديل</button>
-    <a href="index.html" id="homeBtn" class="home-button">الصفحة الرئيسية</a>
-    <button class="print-button" onclick="delayedPrint()">طباعة</button>
-  </div>
-
-  <script>
-    const items = JSON.parse(localStorage.getItem('selectedItems')) || [];
-    const invoiceRows = document.getElementById('invoiceRows');
-    let total = 0;
-
-    items.forEach(item => {
-      const quantity = item.quantity || 1;
-      const itemTotal = item.price * quantity;
-      total += itemTotal;
-
-      const row = document.createElement('div');
-      row.className = 'invoice-row';
-
-      row.innerHTML = `
-        <div>${item.name}</div>
-        <div>${quantity}</div>
-        <div>${itemTotal} ريال</div>
-      `;
-
-      invoiceRows.appendChild(row);
-    });
-
-    document.getElementById('totalPrice').textContent = 'الإجمالي: ' + total + ' ريال';
-
-    function editOrder() {
-      localStorage.setItem('editMode', 'true');
-      setTimeout(function() {
-      window.location.href = 'index.html';
-      }, 130);
-    }
-document.getElementById("homeBtn").addEventListener("click", function(e) {
-  e.preventDefault(); // منع الانتقال الفوري
-  setTimeout(function() {
-    window.location.href = 'index.html';
-  }, 130);
-});
-function delayedPrint() {
-  setTimeout(function() {
-    window.print();
-  }, 130);
+.title-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 10px;
 }
-  </script>
 
-</body>
+#alert-icon {
+  margin-right: auto;
+  margin-left: 10px;
+  cursor: pointer;
+  position: relative;
+  overflow: visible;
+}
+
+#alertPulse {
+  position: relative;
+}
+
+/* الدائرة الضخمة */
+.pulse-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2000px;
+  height: 2000px;
+  background: rgba(255, 255, 0, 0.08); /* أصفر خفي جدًا */
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  animation: pulse-shrink 0.8s ease-out forwards;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* الحركة */
+@keyframes pulse-shrink {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+}
+  </style>  
+</head>  
+  
+<body>  
+  
+<h3 class="title">
+  <div class="title-container">
+    <img src="logo.png" alt="شعار" class="title-image">
+    <div class="title-text">شواية وضاح الدبعي</div>
+    <div id="alert-icon">
+      <div id="alertPulse">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="yellow" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+        </svg>
+        <div id="bubble" class="bubble">جديد</div>
+
+        <!-- الدائرة -->
+        <div class="pulse-circle"></div>
+      </div>
+    </div>
+  </div>
+</h3>
+  
+<!-- فقاعة التحديثات -->  
+<div id="first-time-tooltip" style="position: absolute; left: 50px; top: 0; background: #ffc107; padding: 5px 10px; border-radius: 8px; font-size: 14px; color: black; white-space: nowrap; box-shadow: 0 4px 8px rgba(0,0,0,0.2); display: none;">  
+  التحديثات  
+</div>  
+  
+<!-- نافذة التحديثات -->  
+<div id="updatePopup" class="popup">  
+  <div class="popup-content">  
+    <p>إذا لاحظت اختلافًا في الأسعار، تحقق من وجود تحديثات جديدة.</p>  
+    <button id="checkUpdate">تحقق الآن</button>  
+    <button id="closeUpdatePopup">إغلاق</button>  
+  </div>  
+</div>  
+  
+<!-- نافذة معلومات التصميم -->  
+<div id="popup" class="popup">  
+  <div class="popup-content">  
+    <p>تصميم: <br> عمر فاروق الحمادي</p>  
+    <button id="closePopup">غلق</button>  
+  </div>  
+</div>  
+  
+<!-- قائمة الطعام -->  
+<div class="menu-grid">  
+  <div class="meal-row" data-single-select="false">  
+    <div class="meal-box" data-name="ربع شواية" data-price="2000">ربع شواية</div>  
+    <div class="meal-box" data-name="نص شواية" data-price="4000">نص شواية</div>  
+    <div class="meal-box" data-name="إلا ربع شواية" data-price="6000">إلا ربع شواية</div>  
+    <div class="meal-box" data-name="حبة شواية" data-price="8000">حبة شواية</div>  
+  </div>  
+</div>  
+  
+<button id="executeButton">تنفّيذ</button>  
+  
+<!-- السكربت -->  
+<script>  
+  const logo = document.querySelector('.title-image');  
+  const popup = document.getElementById('popup');  
+  const closePopup = document.getElementById('closePopup');  
+  const alertIcon = document.getElementById('alert-icon');  
+  const updatePopup = document.getElementById('updatePopup');  
+  const closeUpdatePopup = document.getElementById('closeUpdatePopup');  
+  const checkUpdate = document.getElementById('checkUpdate');  
+  
+  let pressTimer;  
+  let isPressing = false;  
+  
+  // الضغط المطول لفتح نافذة المصمم  
+  logo.addEventListener('touchstart', () => {  
+    isPressing = true;  
+    pressTimer = setTimeout(() => {  
+      if (isPressing) {  
+        popup.style.display = 'flex';  
+      }  
+    }, 5000);  
+  });  
+  
+  logo.addEventListener('touchend', () => {  
+    isPressing = false;  
+    clearTimeout(pressTimer);  
+  });  
+  
+  logo.addEventListener('touchcancel', () => {  
+    isPressing = false;  
+    clearTimeout(pressTimer);  
+  });  
+  
+  logo.addEventListener('contextmenu', (e) => {  
+    e.preventDefault();  
+  });  
+  
+  closePopup.addEventListener('click', () => {  
+    popup.style.display = 'none';  
+  });  
+  
+  // إظهار الفقاعة لأول زيارة  
+  window.addEventListener('load', () => {  
+    if (!localStorage.getItem('firstVisitDone')) {  
+      document.getElementById('first-time-tooltip').style.display = 'block';  
+      localStorage.setItem('firstVisitDone', 'true');  
+    }  
+  });  
+  
+  // إخفاء الفقاعة عند الضغط  
+  document.addEventListener('click', () => {  
+    const tooltip = document.getElementById('first-time-tooltip');  
+    if (tooltip.style.display === 'block') {  
+      tooltip.style.display = 'none';  
+    }  
+  });  
+  
+  // إظهار نافذة التحديث عند الضغط على التنبيه  
+  alertIcon.addEventListener('click', () => {  
+    updatePopup.style.display = 'flex';  
+    alertIcon.querySelector('.pulse').classList.add('no-pulse');  
+  });  
+  
+  closeUpdatePopup.addEventListener('click', () => {  
+    updatePopup.style.display = 'none';  
+  });  
+  
+  checkUpdate.addEventListener('click', () => {  
+    window.open('https://example.com/update', '_blank');  
+  });  
+  
+  // إدارة الوجبات  
+  const mealBoxes = document.querySelectorAll('.meal-box');  
+  let selectedMeal = null;  
+  
+  // استرجاع البيانات عند تحميل الصفحة  
+  window.addEventListener('DOMContentLoaded', () => {  
+    const storedItems = JSON.parse(localStorage.getItem('selectedItems'));  
+    const confirmed = localStorage.getItem('confirmedEdit');  
+  
+    if (confirmed === 'true' && storedItems && storedItems.length > 0) {  
+      const meal = storedItems[0];  
+      mealBoxes.forEach(box => {  
+        if (box.dataset.name === meal.name) {  
+          box.classList.add('selected');  
+          selectedMeal = meal;  
+        }  
+      });  
+      localStorage.removeItem('confirmedEdit');  
+    }  
+  });  
+  
+  mealBoxes.forEach(box => {  
+    box.addEventListener('click', () => {  
+      mealBoxes.forEach(b => b.classList.remove('selected'));  
+      box.classList.add('selected');  
+      selectedMeal = {  
+        name: box.dataset.name,  
+        price: parseInt(box.dataset.price),  
+        quantity: 1  
+      };  
+      localStorage.setItem('selectedItems', JSON.stringify([selectedMeal]));  
+    });  
+  });  
+  
+  document.getElementById('executeButton').addEventListener('click', () => {  
+    if (selectedMeal) {  
+      localStorage.setItem('confirmedEdit', 'true');  
+      window.location.href = 'invoice.html';  
+    }  
+  });  
+</script>  
+  
+</body>  
+<script src="script.js"></script>  
 </html>
